@@ -1,28 +1,13 @@
-FROM golang:1.9-alpine
+FROM golang:alpine AS builder
 
-WORKDIR /go/src/github.com/abutaha/aws-es-proxy
-COPY . .
+COPY . /go/src/github.com/abutaha/aws-es-proxy
 
-RUN apk add --update bash curl git && \
-    rm /var/cache/apk/*
+# If we don't disable CGO, the binary won't work in the scratch image. Unsure why?
+RUN CGO_ENABLED=0 go install github.com/abutaha/aws-es-proxy
 
-RUN mkdir -p $$GOPATH/bin && \
-    curl https://glide.sh/get | sh
+FROM scratch
 
-RUN glide install
-RUN CGO_ENABLED=0 GOOS=linux go build -o aws-es-proxy
+COPY --from=builder /go/bin/aws-es-proxy /go/bin/aws-es-proxy
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
-
-FROM alpine:3.7
-LABEL name="aws-es-proxy" \
-      version="latest"
-
-RUN apk --no-cache add ca-certificates
-WORKDIR /home/
-COPY --from=0 /go/src/github.com/abutaha/aws-es-proxy/aws-es-proxy /usr/local/bin/
-
-ENV PORT_NUM 9200
-EXPOSE ${PORT_NUM}
-
-ENTRYPOINT ["aws-es-proxy"] 
-CMD ["-h"]
+ENTRYPOINT ["/go/bin/aws-es-proxy"]
