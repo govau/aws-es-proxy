@@ -92,7 +92,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ep.Host = p.host
 	ep.Scheme = p.scheme
 
-	req, err := http.NewRequest(r.Method, ep.String(), nil)
+	req, err := http.NewRequest(r.Method, ep.String(), bytes.NewReader(reqBodyContent))
 	if err != nil {
 		log.Println("err2")
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -109,6 +109,8 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if val, ok := r.Header["Content-Type"]; ok {
 		req.Header.Set("Content-Type", val[0])
 	}
+
+	req.Header.Set()
 
 	// Sign the request with AWSv4
 	_, err = p.signer.Sign(req, bytes.NewReader(reqBodyContent), p.service, p.region, time.Now())
