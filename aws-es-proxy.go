@@ -110,8 +110,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		req.Header.Set("Content-Type", val[0])
 	}
 
-	req.Header.Set()
-
 	// Sign the request with AWSv4
 	_, err = p.signer.Sign(req, bytes.NewReader(reqBodyContent), p.service, p.region, time.Now())
 	if err != nil {
