@@ -80,16 +80,10 @@ func (p *proxy) init() error {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// first read the body out of the request, and ensure it's closed
-	var reqBodyContent []byte
-	if r.Body != nil {
-		var err error
-		reqBodyContent, err = ioutil.ReadAll(r.Body)
-		r.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	reqBodyContent, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	ep := *r.URL
