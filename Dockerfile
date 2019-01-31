@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:latest AS builder
 
 COPY . /go/src/github.com/abutaha/aws-es-proxy
 
