@@ -7,7 +7,7 @@ RUN CGO_ENABLED=0 go install github.com/abutaha/aws-es-proxy
 
 #FROM scratch
 
-COPY --from=builder /go/bin/aws-es-proxy /go/bin/aws-es-proxy
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+#COPY --from=builder /go/bin/aws-es-proxy /go/bin/aws-es-proxy
+#COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENTRYPOINT ["/go/bin/aws-es-proxy"]
