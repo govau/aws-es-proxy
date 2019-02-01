@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"os"
 	"os/signal"
@@ -83,7 +82,6 @@ func (p *proxy) init() error {
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqBodyContent, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println("err1")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -94,7 +92,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	req, err := http.NewRequest(r.Method, ep.String(), bytes.NewReader(reqBodyContent))
 	if err != nil {
-		log.Println("err2")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -113,17 +110,12 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Sign the request with AWSv4
 	_, err = p.signer.Sign(req, bytes.NewReader(reqBodyContent), p.service, p.region, time.Now())
 	if err != nil {
-		log.Println("err3")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	xx, err := httputil.DumpRequest(req, true)
-	log.Printf("%s\n%s", xx, err)
-
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Println("err4")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
