@@ -25,6 +25,7 @@ import (
 type proxy struct {
 	Endpoint      string
 	ListenAddress string
+	Verbose       bool
 
 	scheme  string
 	host    string
@@ -89,6 +90,14 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ep := *r.URL
 	ep.Host = p.host
 	ep.Scheme = p.scheme
+
+	if p.Verbose {
+		extra := ""
+		if len(reqBodyContent) != 0 {
+			extra = fmt.Sprintf("\n%s", reqBodyContent)
+		}
+		log.Printf("%s %s%s", r.Method, ep.String(), extra)
+	}
 
 	req, err := http.NewRequest(r.Method, ep.String(), bytes.NewReader(reqBodyContent))
 	if err != nil {
@@ -171,6 +180,7 @@ func main() {
 
 	flag.StringVar(&p.Endpoint, "endpoint", "", "Amazon ElasticSearch Endpoint (e.g: https://dummy-host.eu-west-1.es.amazonaws.com)")
 	flag.StringVar(&p.ListenAddress, "listen", "127.0.0.1:9200", "Local TCP port to listen on")
+	flag.BoolVar(&p.Verbose, "verbose", false, "Log queries")
 	flag.Parse()
 
 	if p.Endpoint == "" {
